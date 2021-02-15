@@ -2,49 +2,42 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+class User extends Authenticatable
 {
-    public $timestamps = false;
-    public static function checkName($name)
-    {
-        return strlen($name) >= 2 ? true : false;
-    }
+    use HasFactory, Notifiable;
 
-    public static function register($name, $email, $password)
-    {
-        $user = new User();
-        $user->name = $name;
-        $user->email = $email;
-        $user->password = $password;
-        $user->save();
-        return true;
-    }
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
 
-    public static function checkEmail($email)
-    {
-        return filter_var($email, FILTER_VALIDATE_EMAIL) ? true : false;
-    }
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    public static function checkPassword($password)
-    {
-        return strlen($password) >= 4 ? true : false;
-    }
-
-    public static function checkUserData($email, $password)
-    {
-        $user = User::where('email', '=', $email)->first();
-        if (!is_null($user)) {
-            return $user->id;
-        }
-        return false;
-    }
-
-    public static function auth($userId, Request $request)
-    {
-        $request->session()->put('id_user', $userId);
-        return true;
-    }
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 }
